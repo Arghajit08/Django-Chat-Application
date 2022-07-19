@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block start %}
+<div class="container py-5 px-4">
+    <!-- For demo purpose-->
+    <header class="text-center">
+        <h1 class="display-4 text-white">
+            Chat
+        </h1>
+    </header>
+
+    <div class="row overflow-hidden" id="people_online">
+
+    </div>
+
+    <div class="row rounded-lg overflow-hidden shadow">
+        <!--Users Box-->
+
+        <!--Chat Box-->
+        <div class="col-12 px-0">
+            <div class="px-4 py-5 chat-box bg-white" id="chat_ui">
+                
+            </div>
+
+            <!--Typing area-->
+            <div action="#" class="bg-light">
+                <div class="input-group">
+                    <input type="text" class="form-control rounded-0 border-0 py-4 bg-light" id="message" placeholder="Type a message" >
+                    <div class="input-group-append" onclick="sendMessage()">
+                        <button class="btn btn-link" type="submit" id="button-addon2">
+                            <h1>Send</h1>
+                            <img style="height: 30px" src="https://img.icons8.com/ios/40/000000/send-message.png" alt="">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+    var url='ws://127.0.0.1:8000/chat/{{room_code}}'
+
+    var sender='{{user}}'
+    var websocket=new WebSocket(url)
+
+    websocket.onopen=function(e){
+        console.log('Connected')
+    }
+
+    websocket.onmessage=function(e){
+        console.log(e.data)
+        var data=JSON.parse(e.data)
+        if (data.payload.message){
+            updateUI(data.payload.message,data.payload.sender)
+        }
+    }
+
+    websocket.onclose=function(e){
+        console.log(e)
+    }
+
+    function updateUI(message,sender){
+        var html=`
+        
+        <div class="media w-100 mb-3">
+                    
+        <div class="media-body ml-3">
+                        <div class="bg-primary rounded py-2 px-3 mb-2">
+                            <p class="text-small mb-0 text-white">
+                                ${message}</p>
+                        </div>
+                        <p>Sender - ${sender}</p>
+        </div>
+        </div>
+        `
+
+        document.getElementById('chat_ui').innerHTML+=html
+        
+        
+    }
+
+    function sendMessage(){
+        var message=document.getElementById('message').value
+        websocket.send(JSON.stringify({
+            'message':message,
+            'sender':sender
+            
+        }))
+        document.getElementById('message').value=''
+        }
+
+
+
+    
+        
+
+</script>
+
+{% endblock %}
